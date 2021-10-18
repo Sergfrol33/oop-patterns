@@ -1,10 +1,9 @@
-abstract class State {
+/*abstract class State {
     protected context: Context | undefined
 
     public setContext(context: Context) {
         this.context = context
     }
-
     public abstract switchColor(): void
 }
 
@@ -20,7 +19,6 @@ class Context {
         this.state = state
         this.state.setContext(this)
     }
-
     public addButtonListener() {
         this.button?.addEventListener('click', () => {
             this.state?.switchColor()
@@ -46,4 +44,4 @@ class RedColor extends State {
 }
 
 const context = new Context(new BlackColor())
-context.addButtonListener()
+context.addButtonListener()*/
