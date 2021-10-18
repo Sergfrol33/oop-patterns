@@ -1,47 +1,72 @@
-/*abstract class State {
-    protected context: Context | undefined
-
-    public setContext(context: Context) {
-        this.context = context
-    }
-    public abstract switchColor(): void
+interface Button {
+    onClick(listener: () => void): void
+    customizeButton(options: ButtonOptions): void
 }
 
-class Context {
-    private state: State | undefined
-    private button: HTMLButtonElement | null = document.querySelector('button')
-
-    constructor(state: State) {
-        this.transitionTo(state)
-    }
-
-    public transitionTo(state: State): void {
-        this.state = state
-        this.state.setContext(this)
-    }
-    public addButtonListener() {
-        this.button?.addEventListener('click', () => {
-            this.state?.switchColor()
-        })
-    }
+interface ButtonOptions {
+    text: string
+    classNames?: string
 }
 
-class BlackColor extends State {
-    public switchColor(): void {
-        document.body.classList.remove('red')
-        document.body.classList.add('black')
-        this.context?.transitionTo(new RedColor())
+class WindowsButton implements Button {
+    private button: HTMLButtonElement = document.createElement('button')
+
+    constructor(parent: HTMLElement | null) {
+        this.render(parent)
     }
 
-}
+    onClick(listener: (e: MouseEvent) => void): void {
+        this.button.addEventListener('click', listener)
+    }
 
-class RedColor extends State {
-    public switchColor(): void {
-        document.body.classList.remove('black')
-        document.body.classList.add('red')
-        this.context?.transitionTo(new BlackColor())
+    customizeButton(options: ButtonOptions) {
+        this.button.innerText = options.text
+        if (options.classNames) this.button.className = options.classNames
+    }
+
+    private render(parent: HTMLElement | null): void {
+        parent?.append(this.button)
     }
 }
 
-const context = new Context(new BlackColor())
-context.addButtonListener()*/
+class HTMLButton implements Button {
+    private button: HTMLButtonElement = document.createElement('button')
+
+    constructor(parent: HTMLElement | null) {
+        this.render(parent)
+    }
+
+    onClick(listener: (e: MouseEvent) => void): void {
+        this.button.addEventListener('click', listener)
+    }
+
+    customizeButton(options: ButtonOptions) {
+        this.button.innerText = options.text
+        if (options.classNames) this.button.className = options.classNames
+    }
+
+    private render(parent: HTMLElement | null): void {
+        parent?.append(this.button)
+    }
+}
+
+abstract class Dialog {
+    createButton(parent: HTMLElement | null) {}
+}
+
+class WindowsDialog extends Dialog {
+    createButton(parent: HTMLElement | null) {
+        return new WindowsButton(parent)
+    }
+}
+
+class WebDialog extends Dialog {
+    createButton(parent: HTMLElement | null) {
+        return new HTMLButton(parent)
+    }
+}
+
+const webButton = new WebDialog().createButton(document.querySelector('.wrapper'))
+webButton.customizeButton({text: 'HTMl Button', classNames: 'red'})
+webButton.onClick(() => console.log('click'))
+
