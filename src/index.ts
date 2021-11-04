@@ -1,72 +1,99 @@
-interface Button {
-    onClick(listener: () => void): void
-    customizeButton(options: ButtonOptions): void
-}
+import {Button, Checkbox, GUIFactory} from './types'
 
-interface ButtonOptions {
-    text: string
-    classNames?: string
-}
-
-class WindowsButton implements Button {
-    private button: HTMLButtonElement = document.createElement('button')
-
-    constructor(parent: HTMLElement | null) {
-        this.render(parent)
-    }
-
-    onClick(listener: (e: MouseEvent) => void): void {
-        this.button.addEventListener('click', listener)
-    }
-
-    customizeButton(options: ButtonOptions) {
-        this.button.innerText = options.text
-        if (options.classNames) this.button.className = options.classNames
-    }
-
-    private render(parent: HTMLElement | null): void {
-        parent?.append(this.button)
+class WinButton implements Button {
+    paint(): void {
+        const button = document.createElement('button')
+        button.innerText = 'win button'
+        document.body.append(button)
     }
 }
 
-class HTMLButton implements Button {
-    private button: HTMLButtonElement = document.createElement('button')
-
-    constructor(parent: HTMLElement | null) {
-        this.render(parent)
-    }
-
-    onClick(listener: (e: MouseEvent) => void): void {
-        this.button.addEventListener('click', listener)
-    }
-
-    customizeButton(options: ButtonOptions) {
-        this.button.innerText = options.text
-        if (options.classNames) this.button.className = options.classNames
-    }
-
-    private render(parent: HTMLElement | null): void {
-        parent?.append(this.button)
+class MacButton implements Button {
+    paint(): void {
+        const button = document.createElement('button')
+        button.innerText = 'mac button'
+        document.body.append(button)
     }
 }
 
-abstract class Dialog {
-    createButton(parent: HTMLElement | null) {}
-}
-
-class WindowsDialog extends Dialog {
-    createButton(parent: HTMLElement | null) {
-        return new WindowsButton(parent)
+class WinCheckbox implements Checkbox {
+    paint(): void {
+        const checkbox = document.createElement('input')
+        const label = document.createElement('label')
+        checkbox.type = 'checkbox'
+        label.innerText = 'win checkbox'
+        document.body.append(checkbox, label)
     }
 }
 
-class WebDialog extends Dialog {
-    createButton(parent: HTMLElement | null) {
-        return new HTMLButton(parent)
+class MacCheckbox implements Checkbox {
+    paint(): void {
+        const checkbox = document.createElement('input')
+        const label = document.createElement('label')
+        checkbox.type = 'checkbox'
+        label.innerText = 'mac checkbox'
+        document.body.append(checkbox, label)
     }
 }
 
-const webButton = new WebDialog().createButton(document.querySelector('.wrapper'))
-webButton.customizeButton({text: 'HTMl Button', classNames: 'red'})
-webButton.onClick(() => console.log('click'))
+class WinFactory implements GUIFactory {
+    createButton(): Button {
+        return new WinButton();
+    }
+
+    createCheckbox(): Checkbox {
+        return new WinCheckbox();
+    }
+}
+
+class MacFactory implements GUIFactory {
+    createButton(): Button {
+        return new MacButton();
+    }
+
+    createCheckbox(): Checkbox {
+        return new MacCheckbox();
+    }
+}
+
+class Application {
+    private checkbox: Checkbox | undefined
+    private button: Button | undefined
+    private factory: GUIFactory | undefined
+    constructor(factory: GUIFactory | undefined) {
+        this.factory = factory
+    }
+
+    createUI(): void {
+        this.button = this.factory?.createButton()
+        this.checkbox = this.factory?.createCheckbox()
+    }
+
+    paint(): void {
+        this.button?.paint()
+        this.checkbox?.paint()
+    }
+}
+
+class ApplicationConfigurator {
+    typeFactory: GUIFactory | undefined
+    constructor() {
+        this.main()
+    }
+    main() {
+        let config = navigator.userAgent
+        if (/Win/.test(config)) {
+            this.typeFactory = new WinFactory()
+        } else {
+            this.typeFactory = new MacFactory()
+        }
+        return this.typeFactory
+    }
+}
+
+const appConfig = new ApplicationConfigurator()
+const factory = appConfig.typeFactory
+const app = new Application(factory)
+app.createUI()
+app.paint()
 
